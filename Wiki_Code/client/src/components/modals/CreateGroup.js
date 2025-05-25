@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react';
+import { useState } from 'react'
 import {Form, Button} from "react-bootstrap";
 import Modal from 'react-bootstrap/Modal';
 import { createGroup } from '../../http/textAPI';
