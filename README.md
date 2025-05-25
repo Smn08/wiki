@@ -69,5 +69,3 @@ wiki-platform/
 ```
 
 ## Лицензия
-
-MIT License - см. файл [LICENSE](LICENSE) для подробностей. 
