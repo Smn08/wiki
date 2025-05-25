@@ -1,0 +1,7 @@
+export const ADMIN_ROUTE = '/admin'
+export const LOGIN_ROUTE = '/login'
+export const REGISTRATION_ROUTER = '/registration'
+export const USER_ROUTER = '/user'
+export const WIKIS_ROUTER = '/wikis'
+export const REDACT_ROUTER = '/redact'
+export const USERS_ROUTER = '/users'
