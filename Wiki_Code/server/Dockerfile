@@ -11,8 +11,5 @@ COPY . .
 
 EXPOSE 5000
 
-COPY wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
-
 # Запускаем dev-сервер
 CMD ["npm", "run", "dev"]

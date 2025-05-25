@@ -12,19 +12,34 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   backend:
     build: ./server
     restart: always
+    ports:
+      - "5000:5000"
     environment:
       DB_NAME: wiki
       DB_USER: postgres
       DB_PASSWORD: 1234
       DB_HOST: db
       DB_PORT: 5432
+      NODE_ENV: development
     depends_on:
-      - db
-    command: ["/wait-for-it.sh", "db:5432", "--", "npm", "run", "dev"]
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        sleep 10 &&
+        npm run dev
+      "
 
   frontend:
     build: ./client
