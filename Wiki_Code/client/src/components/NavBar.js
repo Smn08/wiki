@@ -26,11 +26,18 @@ const SetNav = observer(() => {
                 style={{fontWeight:  'bold', fontSize: 20}}
             >
                 {user.isAdmin?
-                    <Nav.Link
-                        onClick={()=> navigator(ADMIN_ROUTE)}
-                    >
-                        Админ панель
-                    </Nav.Link>
+                    <>
+                        <Nav.Link
+                            onClick={()=> navigator(ADMIN_ROUTE)}
+                        >
+                            Админ панель
+                        </Nav.Link>
+                        <Nav.Link
+                            onClick={()=> navigator(ADMIN_ROUTE + '/users')}
+                        >
+                            Управление пользователями
+                        </Nav.Link>
+                    </>
                     :<b/>
                 }
                 <Nav.Link

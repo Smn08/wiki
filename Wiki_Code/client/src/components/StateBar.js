@@ -24,17 +24,42 @@ const StateBar = observer(() => {
     const [delId, setDelId] = useState(-1)
     const navigator = useNavigate()
 
-    
-    const addState = async() =>{
-        var idGroup = text.groups[0].id;
-        var groupName = text.groups[0].name
-        if (text.selectedGroup.id != undefined){
-            idGroup = text.selectedGroup.id
-            groupName = text.selectedGroup.name
+    const addState = async() => {
+        try {
+            // Проверяем авторизацию
+            if (!user.isAuth || !user.id) {
+                console.error('Пользователь не авторизован');
+                navigator('/login');
+                return;
+            }
+
+            // Проверяем наличие групп
+            if (!text.groups || text.groups.length === 0) {
+                console.error('Нет доступных групп');
+                return;
+            }
+
+            // Получаем ID и имя группы
+            let idGroup = text.selectedGroup?.id || text.groups[0].id;
+            let groupName = text.selectedGroup?.name || text.groups[0].name;
+            
+            if (!idGroup || !groupName) {
+                console.error('Не удалось определить группу');
+                return;
+            }
+
+            // Создаем новую статью
+            const data = await createText('Новая статья', '<b>Текст статьи</b>', user.id, idGroup);
+            if (data) {
+                text.addText(data, user.fullName, groupName);
+                navigator(REDACT_ROUTER + "/" + data.id);
+            }
+        } catch (error) {
+            console.error('Ошибка при создании статьи:', error);
+            if (error.response?.status === 401) {
+                navigator('/login');
+            }
         }
-        const data = await createText('Название','<b>Текст статьи</b>',user.id, idGroup)
-        text.addText(data, user.fullName, groupName)
-        navigator(REDACT_ROUTER + "/" + data.id)
     }
 
     return(
@@ -46,7 +71,7 @@ const StateBar = observer(() => {
                     className="d-flex"
                 >
                     <Image 
-                        src = {process.env.REACT_APP_API_URL + user.img}
+                        src={user.img ? process.env.REACT_APP_API_URL + user.img : defaut_awatar}
                         height={35}
                         width={35}
                         roundedCircle
@@ -67,7 +92,7 @@ const StateBar = observer(() => {
                         >
                             Добавить статью
                         </Button>
-                        {!text.selectedUser.id == user.id?
+                        {!text.selectedUser.id === user.id?
                             <Button 
                                 variant="outline-dark"
                                 onClick={() => {
@@ -92,6 +117,7 @@ const StateBar = observer(() => {
             <ListGroup>
                 {text.texts.map(OneText =>
                     <Card
+                        key={OneText.state.id}
                         className="mb-4"
                     >
                         <div className="d-flex">
@@ -100,7 +126,7 @@ const StateBar = observer(() => {
                                 onClick={() => navigator(USER_ROUTER + '/' + OneText.userId)}
                             >
                                 <Image 
-                                    src = {process.env.REACT_APP_API_URL + users.img(OneText.userId)}
+                                    src={users.img(OneText.userId) ? process.env.REACT_APP_API_URL + users.img(OneText.userId) : defaut_awatar}
                                     height={50}
                                     width={50}
                                     roundedCircle
