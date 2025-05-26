@@ -5,8 +5,9 @@ import { authRoutes, publicRoutes } from '../routes';
 import Wikis from '../pages/Wikis';
 import UserPage from '../pages/UserPage';
 import { Context } from "../index";
-import { LOGIN_ROUTE } from '../utils/consts';
+import { LOGIN_ROUTE, WIKIS_ROUTER, REGISTRATION_ROUTER } from '../utils/consts';
 import Login from '../pages/Login';
+import Registration from '../pages/Registration';
 
 const PrivateRoute = ({ children }) => {
     const { user } = useContext(Context);
@@ -22,8 +23,15 @@ const AppRouter = () => {
     const { user } = useContext(Context);
     
     return (
-    <Routes>
-            <Route path={LOGIN_ROUTE} element={<Login />} />
+        <Routes>
+            <Route 
+                path={LOGIN_ROUTE} 
+                element={user.isAuth ? <Navigate to={WIKIS_ROUTER} /> : <Login />} 
+            />
+            <Route 
+                path={REGISTRATION_ROUTER} 
+                element={user.isAuth ? <Navigate to={WIKIS_ROUTER} /> : <Registration />} 
+            />
             
             {authRoutes.map(({ path, Component }) => (
                 <Route
@@ -58,8 +66,11 @@ const AppRouter = () => {
                 />
             ))}
             
-            <Route path="*" element={<Wikis />} />
-    </Routes>
+            <Route 
+                path="*" 
+                element={user.isAuth ? <Wikis /> : <Navigate to={LOGIN_ROUTE} />} 
+            />
+        </Routes>
     );
 };
 

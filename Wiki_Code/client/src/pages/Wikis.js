@@ -74,14 +74,7 @@ const Wikis = observer(() => {
                 <Col md={3}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <h4>Фильтры</h4>
-                        {user.isAuth && (
-                            <Button
-                                variant="primary"
-                                onClick={() => navigate(REDACT_ROUTER + '/0')}
-                            >
-                                Создать статью
-                            </Button>
-                        )}
+                        {user.isAuth}
                     </div>
                     <GrupBar />
                 </Col>

@@ -7,6 +7,7 @@ import { check, getAllUsers } from './http/userAPI';
 import { Spinner } from 'react-bootstrap';
 import { fetchInitialData } from './http/initAPI';
 import { LOGIN_ROUTE, WIKIS_ROUTER } from './utils/consts';
+import Login from './pages/Login';
 
 const App = () => {
   const { user, users, text } = useContext(Context);
@@ -26,7 +27,7 @@ const App = () => {
       console.error('Ошибка при загрузке данных пользователей:', error);
     }
   };
-
+  
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -95,10 +96,11 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path={LOGIN_ROUTE} element={<Login />} />
         <Route path="*" element={
           <>
             {user.isAuth && <NavBar />}
-            <AppRouter />
+      <AppRouter />
           </>
         } />
       </Routes>

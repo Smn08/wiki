@@ -33,11 +33,6 @@ const SetNav = observer(() => {
                         >
                             Админ панель
                         </Nav.Link>
-                        <Nav.Link
-                            onClick={()=> navigator(ADMIN_ROUTE + '/users')}
-                        >
-                            Управление пользователями
-                        </Nav.Link>
                     </>
                     :<b/>
                 }

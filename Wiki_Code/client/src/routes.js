@@ -2,7 +2,8 @@ import { ADMIN_ROUTE, LOGIN_ROUTE, REDACT_ROUTER, REGISTRATION_ROUTER, USERS_ROU
 import Admin from "./pages/Admin"
 import UserPage from "./pages/UserPage"
 import WikiRedact from "./pages/WikiRedact"
-import Auth from "./pages/Auth"
+import Login from "./pages/Login"
+import Registration from "./pages/Registration"
 import Wikis from "./pages/Wikis"
 import Users from "./pages/Users"
 
@@ -28,11 +29,11 @@ export const authRoutes = [
 export const publicRoutes = [
     {
         path: LOGIN_ROUTE,
-        Component: Auth
+        Component: Login
     },
     {
         path: REGISTRATION_ROUTER,
-        Component: Auth
+        Component: Registration
     },
     {
         path: WIKIS_ROUTER,

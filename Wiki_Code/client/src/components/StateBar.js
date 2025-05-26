@@ -21,7 +21,7 @@ const StateBar = observer(() => {
     const [deleteVisible, setDeleteVisible] = useState(false);
     const [delId, setDelId] = useState(-1);
     const navigator = useNavigate();
-
+    
     const addState = async () => {
         try {
             // Check authentication
@@ -191,7 +191,7 @@ const StateBar = observer(() => {
                     </Card>             
                 ))}
             </ListGroup>
-        </Container>
+      </Container>
     );
 });
 
