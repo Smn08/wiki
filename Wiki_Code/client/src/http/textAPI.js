@@ -22,9 +22,18 @@ export const fetchText = async (groupId,userId, page,limit = 3) => {
     return data
 }
 
-export const changeText = async (id,title,text, groupId) =>{
-    const {data} = await $authHost.patch('api/text/' + id, {title: title, text: text,groupId: groupId})
-    return data
+export const changeText = async (id, title, text, groupId) => {
+    try {
+        const {data} = await $authHost.patch(`api/text/${id}`, {
+            title: title,
+            text: text,
+            groupId: groupId
+        });
+        return data;
+    } catch (error) {
+        console.error('Error in changeText:', error);
+        throw error;
+    }
 }
 
 export const delText = async(id) => {

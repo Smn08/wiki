@@ -19,14 +19,14 @@ export default class UsersConteiner{
             id: temp.id,
             user: new UserProfil(
                 temp.id,
-                temp.fullName || '',
+                temp.fn || '',
+                temp.sn || '',
+                temp.foto || '',
                 temp.email || '',
-                temp.img || '',
-                temp.email || '',
-                4,
-                111,
+                0,
+                0,
                 temp.role === 'ADMIN',
-                temp.text || []
+                temp.text || ''
             )
         }));
     }

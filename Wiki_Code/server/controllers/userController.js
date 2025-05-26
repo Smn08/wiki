@@ -14,7 +14,7 @@ const generatorToken = (id,email,role) =>{
 
 class UserController{
     async registration(req,res, next){
-        const {email,password, role} = req.body
+        const {email, password, role, firstName, lastName} = req.body
         if (!email || !password){
             return next(ApiError.badRequest("Некоректный email или password"))
         }
@@ -23,7 +23,13 @@ class UserController{
             return next(ApiError.badRequest("Пользователь с таким emai уже существует"))
         }
         const hashPassword = await bcrypt.hash(password,5)
-        const user = await User.create({email,role,password: hashPassword})
+        const user = await User.create({
+            email,
+            role,
+            password: hashPassword,
+            firstName: firstName || '',
+            lastName: lastName || ''
+        })
         const token = generatorToken(user.id,user.email,user.role)
         return res.json({token})
     }

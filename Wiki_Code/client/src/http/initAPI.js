@@ -2,7 +2,7 @@ import { $authHost } from './index';
 
 export const fetchGroups = async () => {
     try {
-        const { data } = await $authHost.get('group');
+        const { data } = await $authHost.get('api/group');
         return data;
     } catch (error) {
         console.error('Ошибка при загрузке групп:', error);

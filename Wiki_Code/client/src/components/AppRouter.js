@@ -22,7 +22,7 @@ const AppRouter = () => {
     const { user } = useContext(Context);
     
     return (
-        <Routes>
+    <Routes>
             <Route path={LOGIN_ROUTE} element={<Login />} />
             
             {authRoutes.map(({ path, Component }) => (
@@ -59,7 +59,7 @@ const AppRouter = () => {
             ))}
             
             <Route path="*" element={<Wikis />} />
-        </Routes>
+    </Routes>
     );
 };
 

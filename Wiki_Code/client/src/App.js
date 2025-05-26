@@ -1,16 +1,31 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import AppRouter from './components/AppRouter';
 import NavBar from './components/NavBar'
 import { Context } from './index';
-import { check } from './http/userAPI';
+import { check, getAllUsers } from './http/userAPI';
 import { Spinner } from 'react-bootstrap';
-import { fetchUsers } from './http/usersAPI';
 import { fetchInitialData } from './http/initAPI';
+import { LOGIN_ROUTE, WIKIS_ROUTER } from './utils/consts';
 
 const App = () => {
   const { user, users, text } = useContext(Context);
   const [loading, setLoading] = useState(true);
+
+  const loadUserData = async () => {
+    try {
+      const usersData = await getAllUsers();
+      if (usersData && Array.isArray(usersData)) {
+        users.setUsers(usersData);
+        const currentUser = usersData.find(u => u.id === user.id);
+        if (currentUser) {
+          user.setImg(currentUser.foto);
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке данных пользователей:', error);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -23,44 +38,32 @@ const App = () => {
           return;
         }
 
-        // Проверяем авторизацию
+        // Проверяем авторизацию и получаем данные пользователя
         const userData = await check();
-        if (userData) {
-          user.setUser(userData);
-          user.setIsAuth(true);
-          user.setId(userData.id);
-          user.setIsAdmin(userData.role === 'ADMIN');
+        if (!userData) {
+          throw new Error('Не удалось получить данные пользователя');
+        }
 
-          try {
-            // Загружаем остальные данные
-            const [usersData, initialData] = await Promise.all([
-              fetchUsers(),
-              fetchInitialData()
-            ]);
+        // Устанавливаем данные пользователя
+        user.setUser(userData);
+        user.setIsAuth(true);
+        user.setId(userData.id);
+        user.setIsAdmin(userData.role === 'ADMIN');
 
-            if (usersData && Array.isArray(usersData)) {
-              users.setUsers(usersData);
-              if (usersData.length > 0) {
-                const currentUser = usersData.find(u => u.id === userData.id);
-                if (currentUser) {
-                  user.setImg(currentUser.foto);
-                }
-              }
-            }
+        // Загружаем данные пользователей сразу после авторизации
+        await loadUserData();
 
-            if (initialData && initialData.groups && Array.isArray(initialData.groups)) {
-              if (initialData.groups.length > 0) {
-                text.setGroup(initialData.groups);
-              } else {
-                console.warn('Нет доступных групп');
-              }
-            }
-          } catch (error) {
-            console.error('Ошибка при загрузке данных:', error);
+        // Загружаем группы
+        const initialData = await fetchInitialData();
+        if (initialData && initialData.groups && Array.isArray(initialData.groups)) {
+          if (initialData.groups.length > 0) {
+            text.setGroups(initialData.groups);
+          } else {
+            console.warn('Нет доступных групп');
           }
         }
       } catch (error) {
-        console.error('Ошибка при проверке авторизации:', error);
+        console.error('Ошибка при загрузке данных:', error);
         user.setIsAuth(false);
         localStorage.removeItem('token');
       } finally {
@@ -70,6 +73,13 @@ const App = () => {
 
     loadData();
   }, []);
+
+  // Добавляем эффект для обновления данных пользователей при изменении состояния авторизации
+  useEffect(() => {
+    if (user.isAuth) {
+      loadUserData();
+    }
+  }, [user.isAuth]);
 
   if (loading) {
     return (
@@ -84,8 +94,14 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <NavBar />
-      <AppRouter />
+      <Routes>
+        <Route path="*" element={
+          <>
+            {user.isAuth && <NavBar />}
+            <AppRouter />
+          </>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 };
