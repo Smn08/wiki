@@ -29,8 +29,18 @@ jobs:
           cd Wiki_Code
           docker compose up -d
 
+      - name: Ожидание старта backend
+        run: |
+          for i in {1..10}; do
+            if curl --fail http://localhost:5000/health; then
+              exit 0
+            fi
+            sleep 3
+          done
+          exit 1
+          
       - name: Проверка работы backend
-        run: curl http://localhost:5000/api
+        run: curl http://localhost:5000/health
 
       - name: Остановка сервисов
         run: |
