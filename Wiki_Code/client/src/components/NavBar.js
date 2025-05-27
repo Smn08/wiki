@@ -16,6 +16,7 @@ const SetNav = observer(() => {
         user.setIsAdmin(false)
         user.setIsAuth(false)
         user.setId(0)
+        localStorage.removeItem('token')
         navigator(LOGIN_ROUTE)
     }
     
@@ -26,11 +27,13 @@ const SetNav = observer(() => {
                 style={{fontWeight:  'bold', fontSize: 20}}
             >
                 {user.isAdmin?
-                    <Nav.Link
-                        onClick={()=> navigator(ADMIN_ROUTE)}
-                    >
-                        Админ панель
-                    </Nav.Link>
+                    <>
+                        <Nav.Link
+                            onClick={()=> navigator(ADMIN_ROUTE)}
+                        >
+                            Админ панель
+                        </Nav.Link>
+                    </>
                     :<b/>
                 }
                 <Nav.Link
@@ -42,11 +45,6 @@ const SetNav = observer(() => {
                     onClick={()=> navigator(WIKIS_ROUTER)}
                 >
                     Статьи
-                </Nav.Link>
-                <Nav.Link
-                    onClick={()=> navigator(USERS_ROUTER)}
-                >
-                    Пользователи
                 </Nav.Link>
                 <Nav.Link
                     onClick={()=> logOut()}

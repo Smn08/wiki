@@ -1,25 +1,34 @@
-import React, {useContext, useState} from "react";
-import { Button, Card,Image } from "react-bootstrap";
-import { useNavigate,  useParams } from 'react-router-dom';
+import React, {useContext, useState, useEffect} from "react";
+import { Button, Card, Image } from "react-bootstrap";
+import { useNavigate, useParams } from 'react-router-dom';
 import parse from 'html-react-parser';
 import { WIKIS_ROUTER } from "../utils/consts";
 import { Context } from "../index";
 import RedactUser from "../components/modals/RedactUser";
 
-const RenderText = ({str}) =>{
-    return(
-        parse(str)
-    )
+const RenderText = ({str}) => {
+    return parse(str || '');
 }
 
 const UserPage = () => {
-    const {users, user, text} = useContext(Context)
-
+    const {users, user, text} = useContext(Context);
     const {id} = useParams();
-    const userProfil = users.users.find(user => user.id == id).user;
-    const navigator = useNavigate()
-    const [redact,setRedact] = useState(false);
-    const isMyProfil = user.id == id;
+    const navigator = useNavigate();
+    const [redact, setRedact] = useState(false);
+    const [userProfil, setUserProfil] = useState(null);
+
+    useEffect(() => {
+        const foundUser = users.users.find(u => u.id === parseInt(id));
+        if (foundUser) {
+            setUserProfil(foundUser.user);
+        }
+    }, [id, users.users]);
+
+    if (!userProfil) {
+        return <div>Загрузка...</div>;
+    }
+
+    const isMyProfil = user.id === parseInt(id);
 
     return (
         <Card
@@ -28,42 +37,40 @@ const UserPage = () => {
             <div className="d-flex">
                 <Image
                     style={{margin: 50, objectFit: 'cover'}}
-                    src = {process.env.REACT_APP_API_URL + userProfil.img}
+                    src={process.env.REACT_APP_API_URL + (userProfil.img || '')}
                     width={300}
                     height={300}
                     roundedCircle
-                ></Image>
+                />
                 <div className="d-flex_column" style={{fontWeight: "bold"}}>
                     <div
                         className="d-flex"
                         style={{margin: '150px 10px 0px 0px', fontSize: 30}}
                     >
-                        {userProfil.user.fn} {userProfil.user.sn}
+                        {userProfil.fullName}
                     </div>
                     <div 
                         style={{margin: '0px 10px 0px 5px', fontSize: 15}}
                     >
-                        {userProfil.user.email}
+                        {userProfil.email}
                     </div>
                 </div>
                 <div style={{marginTop: 10, marginLeft: "auto"}}>
-                    {isMyProfil?
+                    {isMyProfil && (
                         <Button 
                             style={{marginRight: 10}}
                             variant={"outline-dark"}
-                            onClick={()=> setRedact(true)}
+                            onClick={() => setRedact(true)}
                         >
                             Редактировать профиль
                         </Button>
-                        :
-                        <b/>
-                    }
+                    )}
                     <Button
                         style={{marginRight: 10}}
                         variant={"outline-dark"}
-                        onClick={()=> {
-                            text.setSelectedUser(userProfil)
-                            navigator(WIKIS_ROUTER)
+                        onClick={() => {
+                            text.setSelectedUser(userProfil);
+                            navigator(WIKIS_ROUTER);
                         }}
                     >
                         Статьи
@@ -76,11 +83,11 @@ const UserPage = () => {
                 О себе:
             </div>
             <div style={{margin: 15}}>
-                <RenderText str= {userProfil.text}/>
+                <RenderText str={userProfil.text}/>
             </div>
             <RedactUser 
-                user = {userProfil}
-                show = {redact} 
+                user={userProfil}
+                show={redact} 
                 onHide={() => setRedact(false)}
             />
         </Card>

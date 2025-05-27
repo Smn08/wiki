@@ -7,14 +7,17 @@ const fileUpload = require('express-fileupload')
 const router = require('./routes/index')
 const errorHondler = require('./middleware/ErrorHandlingMiddleware')
 const path = require('path')
-
+const initDb = require('./initDb')
 
 const PORT = process.env.PORT || 5000
 
 const app = express()
+
+app.get('/health', (req, res) => res.send('OK'));
+
 app.use(cors({
     origin: ['http://localhost:3000', 'http://localhost'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }))
@@ -31,16 +34,15 @@ app.use('/api', router)
 //Обработка ошибкиб идет последним middleware
 app.use(errorHondler)
 
-
 const start = async () => {
     try {
         await sequelize.authenticate()
         await sequelize.sync()
+        await initDb() // Инициализация базы данных с администратором
         app.listen(PORT, () => console.log('start server in port ' + PORT))
     } catch (error) {
         console.log(error);
     }
 }
-
 
 start();

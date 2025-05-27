@@ -1,22 +1,38 @@
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/';
+
 const $host = axios.create({
-    baseURL: process.env.REACT_APP_API_URL
-})
+    baseURL: API_URL
+});
 
 const $authHost = axios.create({
-    baseURL: process.env.REACT_APP_API_URL
-})
+    baseURL: API_URL
+});
 
 const authInterceptor = config => {
-    config.headers.authorization = `Bearer ${localStorage.getItem('token')}`
-    return config
-}
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.authorization = `Bearer ${token}`;
+    }
+    return config;
+};
 
-$authHost.interceptors.request.use(authInterceptor)
+$authHost.interceptors.request.use(authInterceptor);
 
+// Добавляем обработчик ответов
+$authHost.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
 
-export{
+export {
     $host,
     $authHost
-}
+};

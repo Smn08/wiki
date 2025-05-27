@@ -10,12 +10,25 @@ export default class UsersConteiner{
     }
 
     setUsers(users){
+        if (!Array.isArray(users)) {
+            console.error('setUsers получил не массив:', users);
+            return;
+        }
 
-        users = users.map(temp => temp = {
+        this._users = users.map(temp => ({
             id: temp.id,
-            user: new UserProfil(temp.id,temp.fn,temp.sn,temp.foto,temp.email,4,111,temp.role == 'ADMIN',temp.text) }
-        )
-        this._users = users
+            user: new UserProfil(
+                temp.id,
+                temp.fn || '',
+                temp.sn || '',
+                temp.foto || '',
+                temp.email || '',
+                0,
+                0,
+                temp.role === 'ADMIN',
+                temp.text || ''
+            )
+        }));
     }
 
     get users(){
@@ -23,16 +36,19 @@ export default class UsersConteiner{
     }
     
     setRole(id, role){
-        this._users.find(teck => teck.id == id).user.setIsAdmin(role)
+        const user = this._users.find(teck => teck.id === id);
+        if (user) {
+            user.user.setIsAdmin(role);
+        }
     }
 
     img(id){
-        
-        let temp = this._users.find(us => us.id == id)
-        if (!temp){
-            console.log(this._users)
+        const user = this._users.find(us => us.id === id);
+        if (!user) {
+            console.warn(`Пользователь с id ${id} не найден`);
+            return '';
         }
-        return temp.user.img
+        return user.user.img || '';
     }
 
 
