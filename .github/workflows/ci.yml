@@ -7,30 +7,40 @@ on:
   pull_request:
     branches: [main]
 
+
 jobs:
-  docker:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Клонирование репозитория
+      - name: Загрузка репозитория
         uses: actions/checkout@v3
 
-      - name: Логин в Docker Hub
+      - name: Установка Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Кэширование Docker
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: логин в Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          
-      - name: Сборка всех сервисов через docker-compose
-        run: |
-          cd Wiki_Code
-          docker compose build
 
-      - name: Запуск сервисов в фоне
+      - name: Билд всех контейнеров
         run: |
-          cd Wiki_Code
-          docker compose up -d
+          docker compose -f Wiki_Code/docker-compose.yml build
 
-      - name: Ожидание старта backend
+      - name: Запуск контейнеров в фоне
+        run: |
+          docker compose -f Wiki_Code/docker-compose.yml up -d
+
+      - name: Ожидание бэка
         run: |
           for i in {1..10}; do
             if curl --fail http://localhost:5000/health; then
@@ -39,16 +49,29 @@ jobs:
             sleep 3
           done
           exit 1
-          
-      - name: Проверка работы backend
-        run: curl http://localhost:5000/health
 
-      - name: Остановка сервисов
+      - name: Тест бэка
         run: |
-          cd Wiki_Code
-          docker compose down
+          curl http://localhost:5000/health
+
+      - name: Остановка контейнеров
+        run: |
+          docker compose -f Wiki_Code/docker-compose.yml down
+
+  Publish-Backend:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Клонирование репозитория
+        uses: actions/checkout@v3
       
-      - name: Пуш backend в Docker Hub
+      - name: Логин в Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: билд и публикация backend
         uses: docker/build-push-action@v4
         with:
           context: Wiki_Code/server
@@ -58,7 +81,18 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/wiki-backend:latest
             ${{ secrets.DOCKER_USERNAME }}/wiki-backend:${{ github.ref_name }}
 
-      - name: Пуш frontend в Docker Hub
+  Publish-Frontend:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Клонирование репозитория
+        uses: actions/checkout@v3
+      - name: Логин в Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: билд и публикация frontend
         uses: docker/build-push-action@v4
         with:
           context: Wiki_Code/client
