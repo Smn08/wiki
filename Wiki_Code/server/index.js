@@ -12,6 +12,9 @@ const initDb = require('./initDb')
 const PORT = process.env.PORT || 5000
 
 const app = express()
+
+app.get('/health', (req, res) => res.send('OK'));
+
 app.use(cors({
     origin: ['http://localhost:3000', 'http://localhost'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
