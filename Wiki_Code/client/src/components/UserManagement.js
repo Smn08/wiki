@@ -1,62 +1,88 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Container, Table, Button, Modal, Form } from 'react-bootstrap';
+import { Container, Button, Modal, Form, Alert, Card, Row, Col, Badge } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../index';
-import { createUser, updateUser, deleteUser } from '../http/userAPI';
+import { fetchUsers, createUser, changeUser, deleteUser } from '../http/usersAPI';
+import { useNavigate } from 'react-router-dom';
+import { LOGIN_ROUTE } from '../utils/consts';
 
 const UserManagement = observer(() => {
-    const { user } = useContext(Context);
-    const [users, setUsers] = useState([]);
+    const { user, users } = useContext(Context);
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        fullName: '',
+        fn: '',
+        sn: '',
         role: 'USER'
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchUsers();
+        loadUsers();
     }, []);
 
-    const fetchUsers = async () => {
+    const loadUsers = async () => {
         try {
-            const response = await fetch(process.env.REACT_APP_API_URL + 'api/users', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            const data = await response.json();
-            setUsers(data);
+            setIsLoading(true);
+            const data = await fetchUsers();
+            users.setUsers(data);
         } catch (error) {
             console.error('Error fetching users:', error);
+            setError('Ошибка при загрузке пользователей');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setIsLoading(true);
             if (selectedUser) {
-                await updateUser(selectedUser.id, formData);
+                await changeUser(selectedUser.id, 'email', formData.email);
+                await changeUser(selectedUser.id, 'fn', formData.fn);
+                await changeUser(selectedUser.id, 'sn', formData.sn);
+                await changeUser(selectedUser.id, 'role', formData.role);
+                
+                if (formData.password) {
+                    await changeUser(selectedUser.id, 'password', formData.password);
+                }
+                
+                if (selectedUser.id === user.id) {
+                    navigate(LOGIN_ROUTE);
+                }
             } else {
                 await createUser(formData);
             }
             setShowModal(false);
-            fetchUsers();
+            await loadUsers();
             resetForm();
         } catch (error) {
             console.error('Error saving user:', error);
+            setError('Ошибка при сохранении пользователя');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleDelete = async (userId) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
+        if (window.confirm('Вы уверены, что хотите удалить этого пользователя?')) {
             try {
+                setIsLoading(true);
                 await deleteUser(userId);
-                fetchUsers();
+                if (userId === user.id) {
+                    navigate(LOGIN_ROUTE);
+                }
+                await loadUsers();
             } catch (error) {
                 console.error('Error deleting user:', error);
+                setError('Ошибка при удалении пользователя');
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -65,92 +91,134 @@ const UserManagement = observer(() => {
         setFormData({
             email: '',
             password: '',
-            fullName: '',
+            fn: '',
+            sn: '',
             role: 'USER'
         });
         setSelectedUser(null);
+        setError('');
     };
 
     if (!user.isAdmin) {
-        return <div>Access denied</div>;
+        return <Alert variant="danger">Доступ запрещен</Alert>;
     }
 
     return (
         <Container>
-            <h2 className="mt-4 mb-4">User Management</h2>
-            <Button 
-                variant="primary" 
-                className="mb-4"
-                onClick={() => {
-                    resetForm();
-                    setShowModal(true);
-                }}
-            >
-                Add New User
-            </Button>
-
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map(user => (
-                        <tr key={user.id}>
-                            <td>{user.fullName}</td>
-                            <td>{user.email}</td>
-                            <td>{user.role}</td>
-                            <td>
-                                <Button
-                                    variant="warning"
-                                    className="me-2"
-                                    onClick={() => {
-                                        setSelectedUser(user);
-                                        setFormData({
-                                            email: user.email,
-                                            fullName: user.fullName,
-                                            role: user.role,
-                                            password: ''
-                                        });
-                                        setShowModal(true);
-                                    }}
-                                >
-                                    Edit
-                                </Button>
-                                <Button
-                                    variant="danger"
-                                    onClick={() => handleDelete(user.id)}
-                                >
-                                    Delete
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            <Card className="mt-4 shadow-sm">
+                <Card.Header className="bg-primary text-white">
+                    <div className="d-flex justify-content-between align-items-center">
+                        <h4 className="mb-0">Управление пользователями</h4>
+                        <Button 
+                            variant="light" 
+                            onClick={() => {
+                                resetForm();
+                                setShowModal(true);
+                            }}
+                            disabled={isLoading}
+                        >
+                            <i className="fas fa-plus-circle me-2"></i>
+                            Добавить пользователя
+                        </Button>
+                    </div>
+                </Card.Header>
+                <Card.Body>
+                    {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
+                    
+                    {isLoading ? (
+                        <div className="text-center py-4">
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Загрузка...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <Row className="g-4">
+                            {users.users.map(user => (
+                                <Col key={user.id} md={6} lg={4}>
+                                    <Card className="h-100 shadow-sm">
+                                        <Card.Body>
+                                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <h5 className="mb-1">{user.fn} {user.sn}</h5>
+                                                    <p className="text-muted mb-0">{user.email}</p>
+                                                </div>
+                                                <Badge bg={user.role === 'ADMIN' ? 'danger' : 'primary'}>
+                                                    {user.role === 'ADMIN' ? 'Администратор' : 'Пользователь'}
+                                                </Badge>
+                                            </div>
+                                            <div className="d-flex justify-content-end gap-2">
+                                                <Button
+                                                    variant="outline-warning"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setFormData({
+                                                            email: user.email,
+                                                            fn: user.fn,
+                                                            sn: user.sn,
+                                                            role: user.role,
+                                                            password: ''
+                                                        });
+                                                        setShowModal(true);
+                                                    }}
+                                                    disabled={isLoading}
+                                                >
+                                                    <i className="fas fa-pencil-alt me-1"></i>
+                                                    Редактировать
+                                                </Button>
+                                                <Button
+                                                    variant="outline-danger"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(user.id)}
+                                                    disabled={isLoading}
+                                                >
+                                                    <i className="fas fa-trash-alt me-1"></i>
+                                                    Удалить
+                                                </Button>
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                    )}
+                </Card.Body>
+            </Card>
 
             <Modal show={showModal} onHide={() => {
-                setShowModal(false);
-                resetForm();
+                if (!isLoading) {
+                    setShowModal(false);
+                    resetForm();
+                }
             }}>
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="bg-light">
                     <Modal.Title>
-                        {selectedUser ? 'Edit User' : 'Add New User'}
+                        {selectedUser ? 'Редактирование пользователя' : 'Новый пользователь'}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Full Name</Form.Label>
+                            <Form.Label>Имя</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={formData.fullName}
-                                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                                value={formData.fn}
+                                onChange={(e) => setFormData({...formData, fn: e.target.value})}
                                 required
+                                placeholder="Введите имя"
+                                disabled={isLoading}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Фамилия</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.sn}
+                                onChange={(e) => setFormData({...formData, sn: e.target.value})}
+                                required
+                                placeholder="Введите фамилию"
+                                disabled={isLoading}
                             />
                         </Form.Group>
 
@@ -161,33 +229,54 @@ const UserManagement = observer(() => {
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 required
+                                placeholder="Введите email"
+                                disabled={isLoading}
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Password</Form.Label>
+                            <Form.Label>Пароль</Form.Label>
                             <Form.Control
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                                 required={!selectedUser}
+                                placeholder={selectedUser ? "Оставьте пустым, чтобы не менять" : "Введите пароль"}
+                                disabled={isLoading}
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Role</Form.Label>
+                            <Form.Label>Роль</Form.Label>
                             <Form.Select
                                 value={formData.role}
                                 onChange={(e) => setFormData({...formData, role: e.target.value})}
+                                disabled={isLoading}
                             >
-                                <option value="USER">User</option>
-                                <option value="ADMIN">Admin</option>
+                                <option value="USER">Пользователь</option>
+                                <option value="ADMIN">Администратор</option>
                             </Form.Select>
                         </Form.Group>
 
-                        <Button variant="primary" type="submit">
-                            {selectedUser ? 'Update User' : 'Create User'}
-                        </Button>
+                        <div className="d-flex justify-content-end gap-2">
+                            <Button 
+                                variant="secondary" 
+                                onClick={() => {
+                                    setShowModal(false);
+                                    resetForm();
+                                }}
+                                disabled={isLoading}
+                            >
+                                Отмена
+                            </Button>
+                            <Button 
+                                variant="primary" 
+                                type="submit"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Сохранение...' : (selectedUser ? 'Сохранить изменения' : 'Создать пользователя')}
+                            </Button>
+                        </div>
                     </Form>
                 </Modal.Body>
             </Modal>

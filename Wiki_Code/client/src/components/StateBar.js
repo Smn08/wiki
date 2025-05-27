@@ -108,21 +108,19 @@ const StateBar = observer(() => {
                         >
                             Добавить статью
                         </Button>
-                        {text.selectedUser.id === user.id ? (
-                            <Button 
-                                variant="outline-dark"
-                                onClick={handleShowAllArticles}
-                            >
-                                Все статьи
-                            </Button>
-                        ) : (
-                            <Button 
-                                variant="outline-dark"
-                                onClick={handleShowMyArticles}
-                            >
-                                Мои статьи
-                            </Button>
-                        )}
+                        <Button 
+                            variant="outline-dark"
+                            style={{ marginRight: 10 }}
+                            onClick={handleShowAllArticles}
+                        >
+                            Все статьи
+                        </Button>
+                        <Button 
+                            variant="outline-dark"
+                            onClick={handleShowMyArticles}
+                        >
+                            Мои статьи
+                        </Button>
                     </div>
                 </div>
             </Card>

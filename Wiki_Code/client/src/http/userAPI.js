@@ -8,15 +8,47 @@ export const registration = async (email, password, firstName, lastName) => {
 }
 
 export const login = async (email, password) => {
-    const {data} = await $host.post('api/user/login', {email, password})
-    localStorage.setItem('token', data.token)
-    return jwt_decode(data.token)
+    try {
+        const {data} = await $host.post('api/user/login', {email, password});
+        if (!data || !data.token) {
+            throw new Error('Invalid response from server');
+        }
+        
+        const decodedToken = jwt_decode(data.token);
+        if (!decodedToken || !decodedToken.id) {
+            throw new Error('Invalid token data');
+        }
+
+        localStorage.setItem('token', data.token);
+        return decodedToken;
+    } catch (error) {
+        localStorage.removeItem('token');
+        throw error;
+    }
 }
 
 export const check = async () => {
-    const {data} = await $authHost.get('api/user/auth')
-    localStorage.setItem('token', data.token)
-    return jwt_decode(data.token)
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found');
+        }
+        const {data} = await $authHost.get('api/user/auth');
+        if (!data || !data.token) {
+            throw new Error('Invalid response from server');
+        }
+        
+        const decodedToken = jwt_decode(data.token);
+        if (!decodedToken || !decodedToken.id) {
+            throw new Error('Invalid token data');
+        }
+
+        localStorage.setItem('token', data.token);
+        return decodedToken;
+    } catch (error) {
+        localStorage.removeItem('token');
+        throw error;
+    }
 }
 
 export const setImg = async (id,img) => {
@@ -45,6 +77,6 @@ export const deleteUser = async (id) => {
 };
 
 export const getAllUsers = async () => {
-    const { data } = await $authHost.get('api/user');
+    const { data } = await $authHost.get('api/users');
     return data;
 };

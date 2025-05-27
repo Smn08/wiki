@@ -39,7 +39,7 @@ const Login = observer(() => {
 
         setLoading(true);
         try {
-        let data;
+            let data;
             if (isLogin) {
                 data = await login(email, password);
             } else {
@@ -56,15 +56,30 @@ const Login = observer(() => {
             user.setIsAuth(true);
             user.setIsAdmin(data.role === 'ADMIN');
             user.setId(data.id);
-            
-            // Перенаправляем на страницу со статьями
-            navigate(WIKIS_ROUTER);
+
+            // Добавляем небольшую задержку перед редиректом
+            // чтобы убедиться, что все данные установлены
+            setTimeout(() => {
+                // Перенаправляем на страницу со статьями
+                navigate(WIKIS_ROUTER, { replace: true });
+            }, 100);
         } catch (e) {
             setError(e.response?.data?.message || 'Произошла ошибка при авторизации');
             // Очищаем токен в случае ошибки
             localStorage.removeItem('token');
+            // Сбрасываем состояние пользователя
+            user.setUser({});
+            user.setIsAuth(false);
+            user.setIsAdmin(false);
+            user.setId(null);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !loading) {
+            handleSubmit();
         }
     };
 
@@ -80,6 +95,7 @@ const Login = observer(() => {
                         className="mt-3"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         placeholder="Введите ваш email..."
                         disabled={loading}
                     />
@@ -88,6 +104,7 @@ const Login = observer(() => {
                         placeholder="Введите ваш пароль..."
                         value={password}
                         onChange={e => setPassword(e.target.value)}
+                        onKeyPress={handleKeyPress}
                         type="password"
                         disabled={loading}
                     />

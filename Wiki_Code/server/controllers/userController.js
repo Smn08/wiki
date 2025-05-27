@@ -14,7 +14,7 @@ const generatorToken = (id,email,role) =>{
 
 class UserController{
     async registration(req,res, next){
-        const {email, password, role, firstName, lastName} = req.body
+        const {email, password, role, fn, sn} = req.body
         if (!email || !password){
             return next(ApiError.badRequest("Некоректный email или password"))
         }
@@ -27,8 +27,8 @@ class UserController{
             email,
             role,
             password: hashPassword,
-            firstName: firstName || '',
-            lastName: lastName || ''
+            fn: fn || '',
+            sn: sn || ''
         })
         const token = generatorToken(user.id,user.email,user.role)
         return res.json({token})

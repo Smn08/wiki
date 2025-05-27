@@ -1,0 +1,149 @@
+.preview-content {
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: #fff;
+    min-height: 400px;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.preview-content p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+}
+
+.preview-content code {
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.preview-content pre {
+    background-color: #f8f9fa;
+    padding: 1em;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.preview-content blockquote {
+    border-left: 4px solid #dee2e6;
+    padding-left: 1em;
+    margin-left: 0;
+    color: #6c757d;
+}
+
+.preview-content ul,
+.preview-content ol {
+    padding-left: 2em;
+    margin-bottom: 1em;
+}
+
+.preview-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+.preview-content th,
+.preview-content td {
+    border: 1px solid #dee2e6;
+    padding: 0.5em;
+}
+
+.preview-content th {
+    background-color: #f8f9fa;
+}
+
+.quill {
+    background: white;
+    border-radius: 0.375rem;
+}
+
+.ql-toolbar {
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.ql-container {
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    border-color: #dee2e6;
+    min-height: 200px;
+}
+
+.ql-editor {
+    min-height: 200px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.ql-editor p {
+    margin-bottom: 1rem;
+}
+
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.ql-editor ul,
+.ql-editor ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.ql-editor blockquote {
+    border-left: 4px solid #dee2e6;
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    color: #6c757d;
+}
+
+.ql-editor pre {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ql-editor code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+.ql-editor img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+}
+
+.ql-editor a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.ql-editor a:hover {
+    text-decoration: underline;
+} 
