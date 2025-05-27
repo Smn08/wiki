@@ -30,7 +30,7 @@ jobs:
           docker compose up -d
 
       - name: Проверка работы backend
-        run: curl http://localhost:5000/health
+        run: curl http://localhost:5000/api
 
       - name: Остановка сервисов
         run: |
