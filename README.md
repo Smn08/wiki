@@ -120,27 +120,23 @@ wiki-platform/
 └── Dockerfile           # Основной Dockerfile
 ```
 
-## Лицензия
+## License
 
-Custom License – Non-Commercial Use Only
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license.
 
-Copyright (c) github.com/Smn08, 2025
+You are free to:
 
-Permission is hereby granted to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, and distribute the Software for non-commercial purposes only, subject to the following conditions:
+- Share — copy and redistribute the material in any medium or format  
+- Adapt — remix, transform, and build upon the material  
 
-1. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+**Under the following terms:**
 
-2. Commercial use of the Software is strictly prohibited without prior written permission from the copyright holder. This includes, but is not limited to, use in proprietary software, SaaS platforms, or any for-profit activities.
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- **NonCommercial** — You may not use the material for commercial purposes.
 
-3. Any modified versions or derivative works of the Software that are distributed must be made available under the same terms as this license, and accompanied by full source code.
+Read the full license text here: [https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
 
-4. The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the author be liable for any claim, damages or other liability arising from the use of the Software.
-
-5. This Software is intended solely for lawful use, such as load testing and research purposes, by authorized users on systems they own or have explicit permission to test. The Software must not be used for unauthorized attacks, denial-of-service operations, or any activities prohibited by applicable law.  
-
-This is not a virus, malware, or illegal tool.
-
-For inquiries regarding commercial licensing, contact: staratushko@ya.ru
+© 2025 [Smn08](https://github.com/Smn08)
 
 ## Контакты
 
