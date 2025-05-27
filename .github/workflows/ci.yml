@@ -18,7 +18,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
+      
+      - name: Установка docker-compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+          
       - name: Сборка всех сервисов через docker-compose
         run: |
           cd Wiki_Code
