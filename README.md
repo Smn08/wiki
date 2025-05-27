@@ -1,84 +1,97 @@
 # Wiki Platform
 
-Современная платформа для создания и управления статьями с системой авторизации и административной панелью.
+Современная платформа для создания и управления вики-статьями с поддержкой групп, пользователей и административных функций.
 
-## Функциональность
+## Быстрый старт с Docker
 
-- 🔐 Аутентификация и авторизация пользователей
-  - Регистрация и вход по email
-  - JWT-токены для безопасной авторизации
-  - Защищенные маршруты
-- 📝 Создание и редактирование статей
-  - Богатый текстовый редактор
-  - Поддержка форматирования
-  - Автосохранение черновиков
-- 🏷️ Категоризация статей
-  - Создание и управление категориями
-  - Фильтрация по категориям
-  - Теги для статей
-- 👤 Управление профилем пользователя
-  - Редактирование профиля
-  - История действий
-  - Избранные статьи
-- 👨‍💼 Административная панель
-  - Управление пользователями
-  - Модерация контента
-  - Статистика платформы
-- ❤️ Система лайков
-  - Оценка статей
-  - Сортировка по популярности
-- 🔍 Поиск по статьям
-  - Полнотекстовый поиск
-  - Фильтры и сортировка
-  - История поиска
+1. Убедитесь, что у вас установлен Docker и Docker Compose
 
-
-## Технологии
-
-### Backend
-- Node.js (v18+)
-- Express.js (v4+)
-- PostgreSQL (v14+)
-- Sequelize ORM
-- JWT Authentication
-- bcrypt для хеширования паролей
-- cors для безопасных кросс-доменных запросов
-
-### Frontend
-- React (v18+)
-- Material-UI
-- Redux Toolkit для управления состоянием
-- React Router v6
-- Formik & Yup для валидации форм
-- Axios для HTTP-запросов
-- MobX для управления состоянием
-
-## Установка и запуск
-
-1. Клонируйте репозиторий:
+2. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/your-username/wiki-platform.git
+git clone https://github.com/Smn08/wiki-platform.git
 cd wiki-platform
 ```
 
-2. Создайте файл .env в корневой директории:
-```env
-DB_NAME=wiki_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-SECRET_KEY=your_secret_key
-PORT=5000
-CLIENT_URL=http://localhost:3000
-```
-
-3. Запустите приложение с помощью Docker:
+3. Запустите приложение:
 ```bash
 docker-compose up --build
 ```
 
 Приложение будет доступно по адресам:
 - Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- Backend API: http://localhost:5000
+- PostgreSQL: localhost:5432
+
+4. Для остановки:
+```bash
+docker-compose down -v
+```
+
+## Основные возможности
+
+- 🔐 Аутентификация и авторизация пользователей
+- 👥 Управление пользователями (для администраторов)
+- 📝 Создание и редактирование статей
+- 🏷️ Группировка статей по категориям
+- ⭐ Система рейтинга статей
+- 👤 Профили пользователей
+- 🔍 Поиск по статьям
+- 📱 Адаптивный дизайн
+
+## Технологии
+
+- Frontend:
+  - React.js
+  - React Router
+  - MobX
+  - Bootstrap
+  - Axios
+  - JWT Authentication
+
+- Backend:
+  - Node.js
+  - Express.js
+  - PostgreSQL
+  - Sequelize ORM
+  - JWT Authentication
+
+- Инфраструктура:
+  - Docker
+  - Docker Compose
+  - Nginx (для production)
+
+## Ручная установка (без Docker)
+
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/Smn08/wiki-platform.git
+```
+
+2. Установите зависимости:
+```bash
+# Backend
+cd server
+npm install
+
+# Frontend
+cd ../client
+npm install
+```
+
+3. Настройте переменные окружения:
+- Создайте файл `.env` в папке `server`
+- Добавьте необходимые переменные (см. `.env.example`)
+
+4. Запустите приложение:
+```bash
+# Backend
+cd server
+npm run dev
+
+# Frontend
+cd ../client
+npm start
+```
 
 ## Структура проекта
 
@@ -87,40 +100,49 @@ wiki-platform/
 ├── client/                 # Frontend приложение
 │   ├── public/            # Статические файлы
 │   └── src/               # Исходный код React
-│       ├── components/    # Переиспользуемые компоненты
-│       ├── pages/         # Страницы приложения
-│       ├── store/         # Управление состоянием
-│       ├── http/          # HTTP-клиент и API
-│       └── utils/         # Вспомогательные функции
+│       ├── components/    # React компоненты
+│       ├── http/         # API клиент
+│       ├── pages/        # Страницы приложения
+│       └── store/        # MobX store
+│
 ├── server/                # Backend приложение
-│   ├── controllers/       # Контроллеры
-│   ├── models/           # Модели данных
-│   ├── routes/           # Маршруты API
-│   ├── middleware/       # Middleware функции
-│   └── utils/            # Вспомогательные функции
-└── docker-compose.yml    # Конфигурация Docker
-```
-
-## Разработка
-
-### Требования
-- Node.js v18+
-- PostgreSQL v14+
-- Docker и Docker Compose (опционально)
-
-### Скрипты
-```bash
-# Установка зависимостей
-npm install
-
-# Запуск в режиме разработки
-npm run dev
-
-# Сборка для продакшена
-npm run build
-
-# Запуск тестов
-npm test
+│   ├── controllers/      # Контроллеры
+│   ├── middleware/       # Middleware
+│   ├── models/          # Модели базы данных
+│   ├── routes/          # Маршруты API
+│   └── utils/           # Вспомогательные функции
+│
+├── docker/               # Docker конфигурации
+│   ├── nginx/           # Nginx конфигурации
+│   └── postgres/        # PostgreSQL конфигурации
+│
+├── docker-compose.yml    # Docker Compose конфигурация
+└── Dockerfile           # Основной Dockerfile
 ```
 
 ## Лицензия
+
+Custom License – Non-Commercial Use Only
+
+Copyright (c) github.com/Smn08, 2025
+
+Permission is hereby granted to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, and distribute the Software for non-commercial purposes only, subject to the following conditions:
+
+1. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+2. Commercial use of the Software is strictly prohibited without prior written permission from the copyright holder. This includes, but is not limited to, use in proprietary software, SaaS platforms, or any for-profit activities.
+
+3. Any modified versions or derivative works of the Software that are distributed must be made available under the same terms as this license, and accompanied by full source code.
+
+4. The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the author be liable for any claim, damages or other liability arising from the use of the Software.
+
+5. This Software is intended solely for lawful use, such as load testing and research purposes, by authorized users on systems they own or have explicit permission to test. The Software must not be used for unauthorized attacks, denial-of-service operations, or any activities prohibited by applicable law.  
+
+This is not a virus, malware, or illegal tool.
+
+For inquiries regarding commercial licensing, contact: staratushko@ya.ru
+
+## Контакты
+
+- Email: staratushko@ya.ru
+- GitHub: [github.com/Smn08](https://github.com/Smn08) 
