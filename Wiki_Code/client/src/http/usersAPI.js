@@ -23,7 +23,7 @@ export const createUser = async (userData) => {
 
 export const changeUser = async (id, pole, value) => {
     const {data} = await $authHost.patch('api/users/' + id, {
-        pole: pole === 'fn' ? 'firstName' : pole === 'sn' ? 'lastName' : pole,
+        pole: pole === 'fn' ? 'fn' : pole === 'sn' ? 'sn' : pole,
         value: value
     })
     return data

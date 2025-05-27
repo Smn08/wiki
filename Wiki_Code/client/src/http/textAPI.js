@@ -1,4 +1,4 @@
-import {$authHost, $host} from "./index";
+import { $host, $authHost } from "./index";
 
 export const createGroup = async (group) => {
     const {data} = await $authHost.post('api/group', group)
@@ -15,9 +15,9 @@ export const createText = async (title, text, userId, groupId) => {
     return data
 }
 
-export const fetchText = async (groupId,userId, page,limit = 3) => {
+export const fetchText = async (groupId, userId, page, limit = 3, id = null) => {
     const {data} = await $host.get('api/text', {params:{
-        groupId,page,limit, userId
+        groupId, page, limit, userId, id
     }})
     return data
 }
@@ -37,6 +37,6 @@ export const changeText = async (id, title, text, groupId) => {
 }
 
 export const delText = async(id) => {
-    const {data} = await $host.delete('api/text/' + id)
+    const {data} = await $authHost.delete('api/text/' + id)
     return data
 }

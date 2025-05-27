@@ -3,7 +3,7 @@ import { Button, Card, Form, Container, Row, Col, ListGroup, Modal } from "react
 import { useParams, useNavigate } from "react-router-dom";
 import { Context } from '../index';
 import { WIKIS_ROUTER } from "../utils/consts";
-import { changeText } from "../http/textAPI";
+import { changeText, fetchText } from "../http/textAPI";
 import GrupBar from "../components/GrupBar";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -11,21 +11,81 @@ import '../styles/WikiRedact.css';
 
 const WikiRedact = () => {
     const { id } = useParams();
-    const { text } = useContext(Context);
+    const { text, user } = useContext(Context);
     const navigator = useNavigate();
 
-    const RedactState = text.texts.find(OneText => OneText.id == id);
-   
-    const [title, setTitle] = useState(RedactState?.state?.title || '');
-    const [redactText, setRedactText] = useState(RedactState?.state?.text || '');
-    const [activeGroup, setActiveGroup] = useState(RedactState?.group || {});
+    const [title, setTitle] = useState('');
+    const [redactText, setRedactText] = useState('');
+    const [activeGroup, setActiveGroup] = useState({});
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [tempTitle, setTempTitle] = useState(RedactState?.state?.title || '');
-    const [tempText, setTempText] = useState(RedactState?.state?.text || '');
-    const [tempGroup, setTempGroup] = useState(RedactState?.group || {});
-    
+    const [tempTitle, setTempTitle] = useState('');
+    const [tempText, setTempText] = useState('');
+    const [tempGroup, setTempGroup] = useState({});
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const loadArticle = async () => {
+            try {
+                setIsLoading(true);
+                // Получаем статью из локального состояния
+                const article = text.texts.find(t => t.id === parseInt(id));
+                
+                if (!article) {
+                    // Если статья не найдена в локальном состоянии, пробуем загрузить с сервера
+                    const data = await fetchText(null, null, 1, 1, id);
+                    if (!data || !data.rows || data.rows.length === 0) {
+                        setError('Статья не найдена');
+                        return;
+                    }
+                    const serverArticle = data.rows[0];
+                    const canEdit = user.isAdmin || (user.isAuth && serverArticle.userId === user.id);
+                    
+                    if (!canEdit) {
+                        setError('У вас нет прав на редактирование этой статьи');
+                        return;
+                    }
+
+                    setTitle(serverArticle.title);
+                    setRedactText(serverArticle.text);
+                    setActiveGroup({ id: serverArticle.groupId, name: serverArticle.group.name });
+                    setTempTitle(serverArticle.title);
+                    setTempText(serverArticle.text);
+                    setTempGroup({ id: serverArticle.groupId, name: serverArticle.group.name });
+                } else {
+                    const canEdit = user.isAdmin || (user.isAuth && article.userId === user.id);
+                    
+                    if (!canEdit) {
+                        setError('У вас нет прав на редактирование этой статьи');
+                        return;
+                    }
+
+                    setTitle(article.state.title);
+                    setRedactText(article.state.text);
+                    setActiveGroup(article.group);
+                    setTempTitle(article.state.title);
+                    setTempText(article.state.text);
+                    setTempGroup(article.group);
+                }
+            } catch (error) {
+                console.error('Error loading article:', error);
+                if (error.response?.status === 401) {
+                    setError('Необходима авторизация');
+                } else if (error.response?.status === 403) {
+                    setError('У вас нет прав на редактирование этой статьи');
+                } else {
+                    setError('Ошибка при загрузке статьи');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadArticle();
+    }, [id, user, text.texts]);
+
     const modules = {
         toolbar: [
             [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -92,7 +152,7 @@ const WikiRedact = () => {
 
         try {
             setIsSaving(true);
-            await changeText(RedactState.id, tempTitle, tempText, tempGroup.id);
+            await changeText(id, tempTitle, tempText, tempGroup.id);
             setTitle(tempTitle);
             setRedactText(tempText);
             setActiveGroup(tempGroup);
@@ -100,7 +160,11 @@ const WikiRedact = () => {
             navigator(WIKIS_ROUTER);
         } catch (error) {
             console.error('Error saving article:', error);
-            alert('Произошла ошибка при сохранении статьи');
+            if (error.response?.status === 403) {
+                alert('У вас нет прав на редактирование этой статьи');
+            } else {
+                alert('Произошла ошибка при сохранении статьи');
+            }
         } finally {
             setIsSaving(false);
         }
@@ -121,6 +185,37 @@ const WikiRedact = () => {
         setHasChanges(false);
         navigator(WIKIS_ROUTER);
     };
+
+    if (isLoading) {
+        return (
+            <Container className="mt-5">
+                <Card className="text-center">
+                    <Card.Body>
+                        <h3>Загрузка...</h3>
+                    </Card.Body>
+                </Card>
+            </Container>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container className="mt-5">
+                <Card className="text-center">
+                    <Card.Body>
+                        <h3 className="text-danger">{error}</h3>
+                        <Button 
+                            variant="primary" 
+                            onClick={() => navigator(WIKIS_ROUTER)}
+                            className="mt-3"
+                        >
+                            Вернуться к статьям
+                        </Button>
+                    </Card.Body>
+                </Card>
+            </Container>
+        );
+    }
 
     return (
         <Container>

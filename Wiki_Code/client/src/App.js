@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
-import AppRouter from './components/AppRouter';
-import NavBar from './components/NavBar'
-import { Context } from './index';
-import { check, getAllUsers } from './http/userAPI';
-import { Spinner } from 'react-bootstrap';
-import { fetchInitialData } from './http/initAPI';
-import { LOGIN_ROUTE, WIKIS_ROUTER } from './utils/consts';
-import Login from './pages/Login';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
+import { Context } from './index';
+import { LOGIN_ROUTE, WIKIS_ROUTER, REGISTRATION_ROUTER } from './utils/consts';
+import { check } from './http/userAPI';
+import { Spinner } from 'react-bootstrap';
+import NavBar from './components/NavBar';
+import AppRouter from './components/AppRouter';
+import Login from './pages/Login';
+import Registration from './pages/Registration';
 
 const App = observer(() => {
   const { user, users, text } = useContext(Context);
@@ -17,19 +17,35 @@ const App = observer(() => {
 
   const loadUserData = async () => {
     try {
-      const usersData = await getAllUsers();
-      if (usersData && Array.isArray(usersData)) {
+      const usersData = await users.fetchUsers();
+      if (usersData) {
         users.setUsers(usersData);
-        const currentUser = usersData.find(u => u.id === user.id);
-        if (currentUser) {
-          user.setImg(currentUser.foto);
-        }
       }
     } catch (error) {
-      console.error('Ошибка при загрузке данных пользователей:', error);
+      console.error('Error loading users:', error);
     }
   };
-  
+
+  const fetchInitialData = async () => {
+    try {
+      const [groupsData, textsData] = await Promise.all([
+        text.fetchGroups(),
+        text.fetchTexts()
+      ]);
+
+      if (groupsData) {
+        text.setGroups(groupsData);
+      }
+
+      if (textsData) {
+        text.setText(textsData.rows);
+        text.setTotalCount(textsData.count);
+      }
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+    }
+  };
+
   const loadAppData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -102,12 +118,17 @@ const App = observer(() => {
       <NavBar />
       <Routes>
         {user.isAuth && <Route path={LOGIN_ROUTE} element={<Navigate to={WIKIS_ROUTER} replace />} />}
-        {!user.isAuth && <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />}
+        {user.isAuth && <Route path={REGISTRATION_ROUTER} element={<Navigate to={WIKIS_ROUTER} replace />} />}
+        
+        {!user.isAuth && (
+          <>
+            <Route path={LOGIN_ROUTE} element={<Login />} />
+            <Route path={REGISTRATION_ROUTER} element={<Registration />} />
+            <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />} />
+          </>
+        )}
         
         {user.isAuth && <Route path="*" element={<AppRouter />} />}
-
-        {!user.isAuth && <Route path={LOGIN_ROUTE} element={<Login />} />}
-
       </Routes>
     </BrowserRouter>
   );

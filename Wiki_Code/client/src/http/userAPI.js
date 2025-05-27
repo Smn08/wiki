@@ -1,30 +1,22 @@
 import { $authHost, $host } from "./index";
 import {jwtDecode as jwt_decode} from 'jwt-decode';
 
-export const registration = async (email, password, firstName, lastName) => {
-    const {data} = await $host.post('api/user/registration', {email, password, firstName, lastName, role: 'USER'})
+export const registration = async (email, password, fn, sn) => {
+    const {data} = await $host.post('api/user/registration', {
+        email, 
+        password, 
+        fn: fn,
+        sn: sn,
+        role: 'USER'
+    })
     localStorage.setItem('token', data.token)
     return jwt_decode(data.token)
 }
 
 export const login = async (email, password) => {
-    try {
-        const {data} = await $host.post('api/user/login', {email, password});
-        if (!data || !data.token) {
-            throw new Error('Invalid response from server');
-        }
-        
-        const decodedToken = jwt_decode(data.token);
-        if (!decodedToken || !decodedToken.id) {
-            throw new Error('Invalid token data');
-        }
-
-        localStorage.setItem('token', data.token);
-        return decodedToken;
-    } catch (error) {
-        localStorage.removeItem('token');
-        throw error;
-    }
+    const {data} = await $host.post('api/user/login', {email, password})
+    localStorage.setItem('token', data.token)
+    return jwt_decode(data.token)
 }
 
 export const check = async () => {
@@ -43,8 +35,21 @@ export const check = async () => {
             throw new Error('Invalid token data');
         }
 
+        // Получаем полные данные пользователя
+        const userResponse = await $authHost.get(`api/user/${decodedToken.id}`);
+        if (!userResponse.data) {
+            throw new Error('Failed to fetch user data');
+        }
+
+        // Объединяем данные из токена и полные данные пользователя
+        const userData = {
+            ...decodedToken,
+            ...userResponse.data,
+            role: decodedToken.role // Убеждаемся, что роль берется из токена
+        };
+
         localStorage.setItem('token', data.token);
-        return decodedToken;
+        return userData;
     } catch (error) {
         localStorage.removeItem('token');
         throw error;
@@ -66,10 +71,10 @@ export const createUser = async (userData) => {
     return data;
 };
 
-export const updateUser = async (id, userData) => {
-    const { data } = await $authHost.patch(`api/users/${id}`, userData);
-    return data;
-};
+export const updateUser = async (formData) => {
+    const {data} = await $authHost.patch('api/user', formData)
+    return data
+}
 
 export const deleteUser = async (id) => {
     const { data } = await $authHost.delete(`api/users/${id}`);
@@ -80,3 +85,13 @@ export const getAllUsers = async () => {
     const { data } = await $authHost.get('api/users');
     return data;
 };
+
+export const fetchUsers = async () => {
+    const {data} = await $authHost.get('api/user')
+    return data
+}
+
+export const fetchOneUser = async (id) => {
+    const {data} = await $authHost.get(`api/user/${id}`)
+    return data
+}
