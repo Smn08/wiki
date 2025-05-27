@@ -51,7 +51,7 @@ jobs:
 
       - name: Тест бэка
         run: |
-          run: curl http://localhost:5000/health
+          curl http://localhost:5000/health
 
       - name: Остановка контейнеров
         run: |
