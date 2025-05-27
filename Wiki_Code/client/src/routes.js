@@ -5,7 +5,7 @@ import WikiRedact from "./pages/WikiRedact"
 import Login from "./pages/Login"
 import Registration from "./pages/Registration"
 import Wikis from "./pages/Wikis"
-import Users from "./pages/Users"
+import UserManagement from "./components/UserManagement"
 
 export const authRoutes = [
     {
@@ -14,7 +14,7 @@ export const authRoutes = [
     },
     {
         path: ADMIN_ROUTE + '/users',
-        Component: Users
+        Component: UserManagement
     },
     {
         path: USER_ROUTER + '/:id',

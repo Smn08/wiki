@@ -4,8 +4,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { authRoutes, publicRoutes } from '../routes';
 import Wikis from '../pages/Wikis';
 import UserPage from '../pages/UserPage';
+import WikiRedact from '../pages/WikiRedact';
 import { Context } from "../index";
-import { LOGIN_ROUTE, WIKIS_ROUTER, REGISTRATION_ROUTER } from '../utils/consts';
+import { LOGIN_ROUTE, WIKIS_ROUTER, REGISTRATION_ROUTER, USER_ROUTER, REDACT_ROUTER } from '../utils/consts';
 import Login from '../pages/Login';
 import Registration from '../pages/Registration';
 
@@ -33,7 +34,8 @@ const AppRouter = () => {
                 element={user.isAuth ? <Navigate to={WIKIS_ROUTER} /> : <Registration />} 
             />
             
-            {authRoutes.map(({ path, Component }) => (
+            {/* Маршруты только для администраторов */}
+            {authRoutes.filter(route => route.path.startsWith('/admin')).map(({ path, Component }) => (
                 <Route
                     key={path}
                     path={path}
@@ -45,8 +47,19 @@ const AppRouter = () => {
                 />
             ))}
             
+            {/* Маршрут редактирования статей */}
             <Route
-                path="/user/:id"
+                path={REDACT_ROUTER + '/:id'}
+                element={
+                    <PrivateRoute>
+                        <WikiRedact />
+                    </PrivateRoute>
+                }
+            />
+            
+            {/* Маршрут профиля пользователя */}
+            <Route
+                path={USER_ROUTER + '/:id'}
                 element={
                     <PrivateRoute>
                         <UserPage />
@@ -54,6 +67,7 @@ const AppRouter = () => {
                 }
             />
             
+            {/* Публичные маршруты */}
             {publicRoutes.map(({ path, Component }) => (
                 <Route
                     key={path}
