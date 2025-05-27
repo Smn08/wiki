@@ -18,16 +18,24 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Установка docker-compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
           
       - name: Сборка всех сервисов через docker-compose
         run: |
           cd Wiki_Code
-          docker-compose up --build
+          docker compose build
+
+      - name: Запуск сервисов в фоне
+        run: |
+          cd Wiki_Code
+          docker compose up -d
+
+      - name: Проверка работы backend
+        run: curl http://localhost:5000/health
+
+      - name: Остановка сервисов
+        run: |
+          cd Wiki_Code
+          docker compose down
       
       - name: Пуш backend в Docker Hub
         uses: docker/build-push-action@v4
