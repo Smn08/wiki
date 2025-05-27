@@ -10,17 +10,27 @@ const initDb = async () => {
 
         if (!adminExists) {
             // Создаем хеш пароля
-            const hashPassword = await bcrypt.hash('xxXX1234', 5);
-            
+            const hashPassword1 = await bcrypt.hash('xxXX1234', 5);
+            const hashPassword2 = await bcrypt.hash('xxXX1234', 5);
+
             // Создаем администратора
             await User.create({
                 email: 'admin@admin.com',
-                password: hashPassword,
+                password: hashPassword1,
                 role: 'ADMIN',
                 fn: 'Administrator',
                 sn: 'Хуйницкий',
                 img: 'https://i.pinimg.com/originals/0d/35/88/0d3588465d463a5160a4384e8ea4c4cd.png',
                 text: 'Я администратор'
+            });
+            await User.create({
+                email: 'user@user.com',
+                password: hashPassword2,
+                role: 'USER',
+                fn: 'USER',
+                sn: 'Хуйницкий',
+                img: 'https://i.pinimg.com/originals/0d/35/88/0d3588465d463a5160a4384e8ea4c4cd.png',
+                text: 'Я не администратор'
             });
             
             console.log('Администратор Хуйницкий успешно создан');

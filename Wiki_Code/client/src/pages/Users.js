@@ -43,8 +43,8 @@ const Users = observer(() => {
                 email: newUser.email,
                 password: newUser.password,
                 role: newUser.role,
-                firstName: newUser.fn,
-                lastName: newUser.sn
+                fn: newUser.fn,
+                sn: newUser.sn
             };
             
             await createUser(userData);

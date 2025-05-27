@@ -1,11 +1,12 @@
 import {makeAutoObservable} from "mobx"
 export default class UserWiki{
     constructor(){
-        this._id = 0;
-        this._isAuth = {}
-        this._isAdmin = {}
-        this._user = {}
-        this._img = {}
+        this._id = null;
+        this._isAuth = false;
+        this._isAdmin = false;
+        this._user = {};
+        this._img = '';
+        this._isInitialized = false;
         makeAutoObservable(this)
     }
 
@@ -21,12 +22,28 @@ export default class UserWiki{
         this._isAdmin = bool
     }
 
-    setUser(user){
-        this._user = user
+    setUser(userData){
+        if (userData) {
+            this._id = userData.id || null;
+            this._isAuth = true;
+            this._isAdmin = userData.role === 'ADMIN';
+            this._user = userData;
+            this._img = userData.foto || '';
+        } else {
+            this._id = null;
+            this._isAuth = false;
+            this._isAdmin = false;
+            this._user = {};
+            this._img = '';
+        }
     }
 
     setId(id){
         this._id = id
+    }
+
+    setIsInitialized(bool) {
+        this._isInitialized = bool;
     }
 
     get isAuth(){
@@ -47,5 +64,9 @@ export default class UserWiki{
 
     get img(){
         return this._img
+    }
+
+    get isInitialized() {
+        return this._isInitialized;
     }
 }

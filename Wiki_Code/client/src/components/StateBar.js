@@ -52,6 +52,7 @@ const StateBar = observer(() => {
             
             const data = await createText(defaultTitle, defaultContent, user.id, idGroup);
             if (data) {
+                // Add the new article to the list
                 text.addText(data, user.fullName, groupName);
                 // Immediately navigate to edit page
                 navigator(REDACT_ROUTER + "/" + data.id);
@@ -83,115 +84,133 @@ const StateBar = observer(() => {
     });
 
     return (
-        <Container>
-            <Card style={{ marginBottom: 20 }}>
-                <div className="d-flex">
-                    <Image 
-                        src={user.img ? process.env.REACT_APP_API_URL + user.img : defaut_awatar}
-                        height={35}
-                        width={35}
-                        roundedCircle
-                        style={{ margin: '10px', cursor: 'pointer', objectFit: 'cover' }}
-                        onClick={() => navigator(USER_ROUTER + '/' + user.id)}
-                    />
-                    <div 
-                        style={{ margin: '15px 0px 0px 5px' }}
-                        onClick={() => addState()}
-                    >
-                        Добавить статью?
-                    </div>
-                    <div style={{ margin: '10px 10px 10px auto' }}>
-                        <Button 
-                            variant="outline-dark"
-                            style={{ marginRight: 10 }}
+        <Container className="py-4">
+            <Card className="shadow-sm mb-4">
+                <Card.Body className="p-3">
+                    <div className="d-flex align-items-center">
+                        <Image 
+                            src={user.img ? process.env.REACT_APP_API_URL + user.img : defaut_awatar}
+                            height={40}
+                            width={40}
+                            roundedCircle
+                            style={{ 
+                                cursor: 'pointer', 
+                                objectFit: 'cover',
+                                border: '2px solid #fff',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                            onClick={() => navigator(USER_ROUTER + '/' + user.id)}
+                        />
+                        <div 
+                            className="ms-3 text-primary"
+                            style={{ cursor: 'pointer' }}
                             onClick={() => addState()}
                         >
-                            Добавить статью
-                        </Button>
-                        {text.selectedUser.id === user.id ? (
+                            Добавить статью?
+                        </div>
+                        <div className="ms-auto d-flex gap-2">
                             <Button 
-                                variant="outline-dark"
+                                variant="primary"
+                                onClick={() => addState()}
+                                className="px-4"
+                            >
+                                Добавить статью
+                            </Button>
+                            <Button 
+                                variant="outline-primary"
                                 onClick={handleShowAllArticles}
+                                className="px-4"
                             >
                                 Все статьи
                             </Button>
-                        ) : (
                             <Button 
-                                variant="outline-dark"
+                                variant="outline-primary"
                                 onClick={handleShowMyArticles}
+                                className="px-4"
                             >
                                 Мои статьи
                             </Button>
-                        )}
+                        </div>
                     </div>
-                </div>
+                </Card.Body>
             </Card>
-            <ListGroup>
+
+            <ListGroup className="gap-3">
                 {filteredTexts.map(OneText => (
                     <Card
                         key={OneText.state.id}
-                        className="mb-4"
+                        className="shadow-sm"
                     >
-                        <div className="d-flex">
-                            <div
-                                style={{cursor: 'pointer'}}
-                                onClick={() => navigator(USER_ROUTER + '/' + OneText.userId)}
-                            >
-                                <Image 
-                                    src={users.img(OneText.userId) ? process.env.REACT_APP_API_URL + users.img(OneText.userId) : defaut_awatar}
-                                    height={50}
-                                    width={50}
-                                    roundedCircle
-                                    style={{margin: '10px 10px 5px 15px', objectFit: 'cover'}}
-                                />
-                                <b style={{marginTop: 20}}>
-                                    {OneText.userName}
-                                </b>
+                        <Card.Body className="p-4">
+                            <div className="d-flex align-items-center mb-3">
+                                <div
+                                    className="d-flex align-items-center"
+                                    style={{cursor: 'pointer'}}
+                                    onClick={() => navigator(USER_ROUTER + '/' + OneText.userId)}
+                                >
+                                    <Image 
+                                        src={users.img(OneText.userId) ? process.env.REACT_APP_API_URL + users.img(OneText.userId) : defaut_awatar}
+                                        height={50}
+                                        width={50}
+                                        roundedCircle
+                                        style={{
+                                            objectFit: 'cover',
+                                            border: '2px solid #fff',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}
+                                    />
+                                    <span className="ms-3 fw-bold">
+                                        {OneText.userName}
+                                    </span>
+                                </div>
+                                {user.isAdmin && (
+                                    <CloseButton
+                                        className="ms-auto"
+                                        onClick={() => {
+                                            setDeleteVisible(true);
+                                            setDelId(OneText.state.id);
+                                        }}
+                                    />
+                                )}
                             </div>
-                            {user.isAdmin && (
-                                <CloseButton
-                                    style={{margin: '10px 10px 10px auto'}}
-                                    onClick={() => {
-                                        setDeleteVisible(true);
-                                        setDelId(OneText.state.id);
-                                    }}
+                
+                            <div 
+                                className="text-primary mb-2"
+                                style={{cursor: 'pointer'}}
+                                onClick={() => text.setSelectedGroup(OneText.group)}
+                            >
+                                {'#' + OneText.group.name}
+                            </div>
+
+                            <h3 className="mb-3 fw-light">
+                                {OneText.state.title} 
+                            </h3>
+
+                            <div className="mb-3">
+                                <RenderText str={OneText.state.text}/>
+                            </div>
+
+                            <div className="d-flex align-items-center gap-3">
+                                <StarButton 
+                                    mark={OneText.mark}
                                 />
-                            )}
-                        </div>
-            
-                        <div 
-                            style={{marginLeft: 15, fontSize: 14, color: '#2A5885', cursor: 'pointer'}}
-                            onClick={() => text.setSelectedGroup(OneText.group)}
-                        >
-                            {'#' + OneText.group.name}
-                        </div>
-
-                        <div 
-                            style={{marginLeft: 19, fontSize: 25, fontWeight: "lighter"}}
-                        >
-                            {OneText.state.title} 
-                        </div>
-
-                        <div style={{margin: 15}}>
-                            <RenderText str={OneText.state.text}/>
-                        </div>
-
-                        <div className="d-flex">
-                            <StarButton 
-                                mark={OneText.mark}
-                            />
-                            <PencilButton idState={OneText.state.id}/>
-                        </div>
+                                <PencilButton 
+                                    idState={OneText.state.id}
+                                    userId={OneText.userId}
+                                />
+                            </div>
+                        </Card.Body>
 
                         <DeletePanel 
                             id={delId}
+                            userId={text.texts.find(t => t.id === delId)?.userId}
                             show={deleteVisible} 
                             onHide={() => setDeleteVisible(false)} 
                         />
                     </Card>             
                 ))}
             </ListGroup>
-      </Container>
+        </Container>
     );
 });
 

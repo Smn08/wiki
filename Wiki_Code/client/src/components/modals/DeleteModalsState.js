@@ -5,35 +5,49 @@ import { delText } from '../../http/textAPI';
 import { useContext } from 'react';
 import { Context } from '../../index';
 
-const DeletePanel = ({show, onHide, id}) =>{
-  const {text} = useContext(Context)
-  const Delete = async () =>{
-    await delText(id).then(data=> {
-      text.delTextId(id)
-      onHide()
+const DeletePanel = ({ show, onHide, id, userId }) => {
+    const { text, user } = useContext(Context);
+    const canDelete = user.isAdmin || (user.isAuth && user.id === userId);
+
+    const Delete = async () => {
+        try {
+            await delText(id);
+            text.delTextId(id);
+            onHide();
+        } catch (error) {
+            console.error('Error deleting article:', error);
+            if (error.response?.status === 403) {
+                alert('У вас нет прав на удаление этой статьи');
+            } else {
+                alert('Произошла ошибка при удалении статьи');
+            }
+        }
+    };
+
+    if (!canDelete) {
+        return null;
     }
-  )}
 
-  return (
-    <Modal
-      show = {show}
-      onHide={onHide}
-    >
-        <Modal.Header closeButton>
-          <Modal.Title style={{color: "red"}}>Удалить статью</Modal.Title>
-        </Modal.Header>
+    return (
+        <Modal
+            show={show}
+            onHide={onHide}
+        >
+            <Modal.Header closeButton>
+                <Modal.Title style={{color: "red"}}>Удалить статью</Modal.Title>
+            </Modal.Header>
 
-        <Modal.Body>
-          <p> Вы действительно хотите удалить статью?
-              <br/>Отменить это действие будет невозможно.</p>
-        </Modal.Body>
+            <Modal.Body>
+                <p>Вы действительно хотите удалить статью?
+                    <br/>Отменить это действие будет невозможно.</p>
+            </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>Закрыть</Button>
-          <Button variant="primary" onClick={()=> Delete()}>Удалить</Button>
-        </Modal.Footer>
-      </Modal>
-  );
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onHide}>Закрыть</Button>
+                <Button variant="danger" onClick={Delete}>Удалить</Button>
+            </Modal.Footer>
+        </Modal>
+    );
 };
 
 export default DeletePanel;
